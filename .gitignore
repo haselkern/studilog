@@ -1,0 +1,7 @@
+venv/
+build/
+src/ui/*.py
+!src/ui/__init__.py
+*.lnk
+.idea/
+*__pycache__*

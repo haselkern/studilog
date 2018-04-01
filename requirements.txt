@@ -1,0 +1,5 @@
+cx-Freeze==5.1.1
+jsonpickle==0.9.6
+PyQt5==5.10.1
+pyqt5-tools==5.9.0.1.2
+sip==4.19.8
