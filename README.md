@@ -15,7 +15,7 @@ Make sure to generate the necessary python files from the ui files by running:
 pyuic5 src/ui/mainwindow.ui -o src/ui/mainwindow.py
 ```
 
-You can then run `src/main.py` to launch the program.
+To launch the programm cd into `src` and run `main.py`.
 
 To build an executable for windows:
 ```

@@ -2,6 +2,7 @@ from cx_Freeze import setup, Executable
 
 exe_options = {
     "includes": ["ui"],
+    "include_files": ["res"],
     "optimize": 2,
 }
 

@@ -289,7 +289,10 @@
     <property name="title">
      <string>&amp;Datei</string>
     </property>
+    <addaction name="action_save"/>
     <addaction name="action_add_course"/>
+    <addaction name="action_delete_course"/>
+    <addaction name="separator"/>
     <addaction name="action_quit"/>
    </widget>
    <addaction name="menuModule"/>
@@ -308,6 +311,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_delete_course">
+   <property name="text">
+    <string>Ausgewähltes Modul löschen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="action_save">
+   <property name="text">
+    <string>Speichern</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>
