@@ -27,6 +27,14 @@ class Course:
         self.year = datetime.datetime.now().year
         self.duration = 1
 
+    def is_passed(self):
+        """True if this course was passed, with or without grade."""
+        return self.state == CourseState.PASSED or self.state == CourseState.GRADED
+
+    def is_graded(self):
+        """True, if this course was passed with a grade."""
+        return self.state == CourseState.GRADED
+
     def date_index(self):
         """Returns an integer representing when this course was held.
         Formula: Year * 2 + (Semester 0 or 1)

@@ -58,7 +58,7 @@ class CoursesWidget(QWidget):
 
         # Layout rects
         pixels_per_credit = 25
-        pixels_per_semester = 50
+        pixels_per_semester = 80
         lowest_date_index = min([c.date_index() for c in self.courses], default=0) # is used to calculate y
         for key in courses_by_date_index:
             for course in courses_by_date_index[key]:
@@ -114,6 +114,12 @@ class CoursesWidget(QWidget):
         qp.end()
 
 
+class SaveData:
+    def __init__(self):
+        self.courses = []
+        self.uncount_credits = 0
+
+
 class MainWindow(QMainWindow, ui.mainwindow.Ui_MainWindow):
 
     SAVE_FILE = "courses.json"
@@ -125,8 +131,12 @@ class MainWindow(QMainWindow, ui.mainwindow.Ui_MainWindow):
 
         self.selected_course = None
         self.courses_widget = CoursesWidget(self)
-        self.courses_widget.courses = self.load()
         self.courses_area.setWidget(self.courses_widget)
+
+        # Load data
+        data = MainWindow.load()
+        self.courses_widget.courses = data.courses
+        self.courses = data.courses
 
         self.course_settings_container.setVisible(False)
 
@@ -152,6 +162,7 @@ class MainWindow(QMainWindow, ui.mainwindow.Ui_MainWindow):
 
         # Setup title
         self.set_dirty(False)
+        self.update_details()
 
     def resizeEvent(self, *args, **kwargs):
         self.courses_widget.refresh()
@@ -196,8 +207,29 @@ class MainWindow(QMainWindow, ui.mainwindow.Ui_MainWindow):
             self.update_details()
 
     def update_details(self):
-        # Enable/Disable widgets
-        self.course_grade.setDisabled(self.selected_course.state != uni.CourseState.GRADED)
+        if not self.selected_course is None:
+            # Enable/Disable widgets on the right
+            self.course_grade.setDisabled(not self.selected_course.is_graded())
+        # Update calculations on the left
+        self.label_credits.setText(str(self.get_passed_credits()))
+        self.label_grade_average.setText("{:.3f}".format(self.get_weighted_grade_average()))
+        self.label_planned_credits.setText(str(self.get_all_credits()))
+
+    def get_passed_credits(self):
+        return sum([c.credits for c in self.courses if c.is_passed()] + [0])
+
+    def get_all_credits(self):
+        return sum([c.credits for c in self.courses])
+
+    def get_weighted_grade_average(self):
+        courses = self.courses_widget.courses
+        weighted_credit_count = sum([c.credits for c in courses if c.is_graded()] + [0])
+        if weighted_credit_count != 0:
+            credits_with_grades = sum([c.credits * c.grade for c in courses if c.is_graded()])
+            grade_average = credits_with_grades/weighted_credit_count
+            return grade_average
+        else:
+            return 0
 
     def course_clicked(self, course):
         """Sets the selected course to the input fields."""
@@ -230,30 +262,34 @@ class MainWindow(QMainWindow, ui.mainwindow.Ui_MainWindow):
         self.courses_widget.delete_course(self.selected_course)
         self.selected_course = None
         self.set_dirty(True)
+        self.update_details()
 
     @staticmethod
-    def get_save_folder():
+    def get_save_file():
         data_dir = str(pathlib.Path.home()) + "/.haselkern/studilog/"
         try:
             os.makedirs(data_dir)
         except:
             # Folder already exists, that's fine
             pass
-        return data_dir
+        return data_dir + MainWindow.SAVE_FILE
 
     def save(self):
-        json_courses = jsonpickle.encode(self.courses_widget.courses)
-        with open(MainWindow.get_save_folder() + MainWindow.SAVE_FILE, "w") as f:
-            f.write(json_courses)
+        data = SaveData()
+        data.courses = self.courses_widget.courses
+        json_data = jsonpickle.encode(data)
+        with open(MainWindow.get_save_file(), "w") as f:
+            f.write(json_data)
         self.set_dirty(False)
 
     @staticmethod
     def load():
         try:
-            with open(MainWindow.get_save_folder() + MainWindow.SAVE_FILE) as f:
+            with open(MainWindow.get_save_file()) as f:
                 return jsonpickle.decode(f.read())
         except:
-            return []
+            print("No saved data.")
+            return SaveData()
 
     def quit(self):
         self.close()
